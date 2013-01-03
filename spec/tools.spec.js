@@ -1,4 +1,5 @@
 var tools = require('../lib/tools')
+  , View = require('../lib/View')
 
 function random(range, signed) {
   return (signed ? range / -2 : 0) + Math.floor(Math.random() * range)
@@ -53,9 +54,9 @@ function shift(string, offset, begin, end) {
 
 describe("A property ganareted by tools.", function() {
   var buffer = tools.node ? (new Buffer(10)) : (new ArrayBuffer(10))
-    , bufferView = tools.view(buffer)
+    , bufferView = new View(buffer)
     , reference = tools.node ? (new Buffer(4)) : (new ArrayBuffer(4))
-    , referenceView = tools.view(reference)
+    , referenceView = new View(reference)
 
   // Random buffer content
   for (var i = 0; i < buffer.length; i++) bufferView.writeUInt8(random(256), i)
@@ -86,9 +87,7 @@ describe("A property ganareted by tools.", function() {
         expect(bufferView.prop).toBe(data);
 
         // Reading back the data through the view
-        var postfix = (t.signed ? '' : 'U') + 'Int' + t.bitLength + (t.bitLength == 8 ? '' : (t.littleEndian ? 'LE' : 'BE'))
-          , read = tools['read' + postfix]
-        expect(read(bufferView, t.byteOffset)).toBe(data);
+        expect(bufferView.get(t.signed, t.bitLength, t.littleEndian, t.byteOffset)).toBe(data);
 
         // Everything else must be unchanged
         newState.splice(t.byteOffset, t.bitLength / 8)
@@ -140,7 +139,7 @@ describe("A property ganareted by tools.", function() {
 
 describe("tools.shift(view, offset, begin, end)", function() {
   var buffer = tools.node ? (new Buffer(10)) : (new ArrayBuffer(10))
-    , bufferView = tools.view(buffer)
+    , bufferView = new View(buffer)
 
   // Generating testcases
   var tests = [], begin
