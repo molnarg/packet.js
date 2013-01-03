@@ -1,4 +1,4 @@
-var tools = require('../lib/tools')
+var fields = require('../lib/fields')
   , View = require('../lib/View')
 
 function random(range, signed) {
@@ -53,9 +53,9 @@ function shift(string, offset, begin, end) {
 }
 
 describe("A property ganareted by tools.", function() {
-  var buffer = tools.node ? (new Buffer(10)) : (new ArrayBuffer(10))
+  var buffer = fields.node ? (new Buffer(10)) : (new ArrayBuffer(10))
     , bufferView = new View(buffer)
-    , reference = tools.node ? (new Buffer(4)) : (new ArrayBuffer(4))
+    , reference = fields.node ? (new Buffer(4)) : (new ArrayBuffer(4))
     , referenceView = new View(reference)
 
   // Random buffer content
@@ -75,7 +75,7 @@ describe("A property ganareted by tools.", function() {
       tests.forEach(function(t, i) {
         // Defining the property and generating random data to be written
         delete bufferView.prop
-        Object.defineProperty(bufferView, 'prop', tools.field(t.byteOffset, 0, t.bitLength, t.signed, t.littleEndian))
+        Object.defineProperty(bufferView, 'prop', fields.field(t.byteOffset, 0, t.bitLength, t.signed, t.littleEndian))
         var data = random(Math.pow(2, t.bitLength), t.signed)
 
         // Saving the original state, writing data through the property and saving the new state
@@ -109,7 +109,7 @@ describe("A property ganareted by tools.", function() {
     it("should write and read the data to/from the appropriate position", function() {
       tests.forEach(function(t, i) {
         // Defining the property and generating random data to be written
-        Object.defineProperty(bufferView, 'prop', tools.field(t.byteOffset, t.bitOffset, t.bitLength))
+        Object.defineProperty(bufferView, 'prop', fields.field(t.byteOffset, t.bitOffset, t.bitLength))
         var data = random(Math.pow(2, t.bitLength), t.signed)
 
         // Saving the original state, writing data through the property and saving the new state
@@ -137,8 +137,8 @@ describe("A property ganareted by tools.", function() {
   })
 })
 
-describe("tools.shift(view, offset, begin, end)", function() {
-  var buffer = tools.node ? (new Buffer(10)) : (new ArrayBuffer(10))
+describe("fields.shift(view, offset, begin, end)", function() {
+  var buffer = fields.node ? (new Buffer(10)) : (new ArrayBuffer(10))
     , bufferView = new View(buffer)
 
   // Generating testcases
@@ -156,7 +156,7 @@ describe("tools.shift(view, offset, begin, end)", function() {
 
       // Saving the original state, shifting the data and saving the new state
       var originalState = bitStringView(bufferView)
-      tools.shift(bufferView, t.offset, t.begin, t.end)
+      fields.shift(bufferView, t.offset, t.begin, t.end)
       var newState = bitStringView(bufferView)
 
       // Comparing result with string shifting result
