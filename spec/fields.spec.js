@@ -1,5 +1,7 @@
 var fields = require('../lib/fields')
   , View = require('../lib/View')
+  , read  = Function.prototype.call.bind(View.prototype.get(false, 8))
+  , write = Function.prototype.call.bind(View.prototype.set(false, 8))
 
 function random(range, signed) {
   return (signed ? range / -2 : 0) + Math.floor(Math.random() * range)
@@ -172,6 +174,81 @@ describe("fields.shift(view, offset, begin, end)", function() {
                  + 'new      ' + emphasize(newState     , bitBegin, bitEnd, 8) + '\n'
                  + 'expected ' + emphasize(shiftedState , bitBegin, bitEnd, 8) + '\n'
                  )
+    })
+  })
+})
+
+describe("fields.copy(source, sourceBitOffset, bitLength, target, targetBitOffset)", function() {
+  var length = 10
+    , source = fields.node ? (new Buffer(length)) : (new ArrayBuffer(length))
+    , target = fields.node ? (new Buffer(length)) : (new ArrayBuffer(length))
+    , sourceView = new View(source)
+    , targetView = new View(target)
+
+  // Generating testcases
+  var tests = [], test
+  for (var i = 0; i < 100; i++) {
+    tests.push(test = {})
+
+    test.bitLength = random(length * 8) + 1
+    test.sourceBitOffset = random(length * 8 - test.bitLength + 1)
+    test.targetBitOffset = random(length * 8 - test.bitLength + 1)
+
+    for (var j = 0; j < length; j++) {
+      write(sourceView, j, random(256))
+      write(targetView, j, random(256))
+    }
+
+    test.sourceBefore = bitStringView(sourceView)
+    test.targetBefore = bitStringView(targetView)
+    fields.copy(sourceView, test.sourceBitOffset, test.bitLength, targetView, test.targetBitOffset)
+    test.sourceAfter = bitStringView(sourceView)
+    test.targetAfter = bitStringView(targetView)
+  }
+
+  it('should copy the given bit array from "source" to "target"', function() {
+    tests.forEach(function(t, i) {
+      var source = t.sourceBefore.substr(t.sourceBitOffset, t.bitLength)
+        , target = t.targetAfter.substr(t.targetBitOffset, t.bitLength)
+
+      if (source !== target)
+      console.log( i + '. ' + t.bitLength + ' bits ' + t.sourceBitOffset + ' -> ' + t.targetBitOffset
+                 + '\n' + emphasize(source, 0, source.length, 8)
+                 + '\n' + emphasize(target, 0, target.length, 8)
+                 )
+
+      expect(source).toBe(target)
+    })
+  })
+
+  it('should not modify anything else in the "target"', function() {
+    tests.forEach(function(t, i) {
+      var before = t.targetBefore
+        , after = t.targetAfter
+
+      before = before.substr(0, t.targetBitOffset).concat(before.substr(t.targetBitOffset + t.bitLength))
+      after  = after .substr(0, t.targetBitOffset).concat(after .substr(t.targetBitOffset + t.bitLength))
+
+      if (before !== after)
+      console.log( i + '. ' + t.bitLength + ' bits ' + t.sourceBitOffset + ' -> ' + t.targetBitOffset
+                 + '\n' + emphasize(t.sourceBefore, t.sourceBitOffset, t.sourceBitOffset + t.bitLength, 8)
+                 + '\n' + emphasize(t.targetBefore, t.targetBitOffset, t.targetBitOffset + t.bitLength, 8)
+                 + '\n' + emphasize(t.targetAfter , t.targetBitOffset, t.targetBitOffset + t.bitLength, 8)
+                 )
+
+      expect(before).toBe(after)
+    })
+  })
+
+  it('should not modify anything else in the "source"', function() {
+    tests.forEach(function(t, i) {
+      var before = t.sourceBefore
+        , after = t.sourceAfter
+
+      before = before.substr(0, t.sourceBitOffset).concat(before.substr(t.sourceBitOffset + t.bitLength))
+      after  = after .substr(0, t.sourceBitOffset).concat(after .substr(t.sourceBitOffset + t.bitLength))
+
+      expect(before).toBe(after)
     })
   })
 })
