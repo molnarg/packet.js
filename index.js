@@ -4,6 +4,7 @@ module.exports = {
   },
   stream: {
     decoder: require('./lib/streams/decoder'),
+    filter: require('./lib/streams/filter'),
     printer: require('./lib/streams/printer')
   }
 }
