@@ -1,7 +1,5 @@
 module.exports = {
-  views: {
-    EthernetFrame: require('./lib/views/EthernetFrame')
-  },
+  views: require('./lib/views'),
   stream: {
     decoder: require('./lib/streams/decoder'),
     filter: require('./lib/streams/filter'),
