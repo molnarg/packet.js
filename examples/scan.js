@@ -11,7 +11,7 @@ var untested = [], unknown = [], closed = [], open = []
 for (var port = first_port; port <= last_port; port++) untested.push(port)
 
 // Creating the SYN packet
-var Packet = require('..'), syn = new Packet(new Buffer(20)).tcp
+var Packet = require('..'), syn = new Packet(20).tcp
 syn.root.fill(0);
 syn.set({
   srcport:  65535 - Math.floor(Math.random() * 100),  // A port probably unused by others

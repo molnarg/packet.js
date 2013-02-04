@@ -1,5 +1,5 @@
 var Packet = require('..')
-  , message = new Packet(new Buffer(1000)).dns
+  , message = new Packet(1000).dns
 message.set({
   id:         1,
   flags:      0x0100,

@@ -1,6 +1,6 @@
 // Request packet
 var Packet = require('..')
-  , request = new Packet(new Buffer(1000)).icmp
+  , request = new Packet(1000).icmp
 request.set({
   type: 8,
   code: 0,
